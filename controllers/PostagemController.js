@@ -23,7 +23,7 @@ function PostagemController(app) {
                 driver: sqlite3.Database
             })
             await db.run(`INSERT INTO noticias(titulo,conteudo, autor, image) 
-            VALUES(?,?,?,?)`, req.body.titulo, req.body.conteudo, req.body.autor,req.body.image)
+            VALUES(?,?,?,?)`, req.body.titulo, req.body.conteudo, req.body.autor, req.body.image)
             res.send(`Notícia: ${req.body.titulo} inserida com sucesso.`)
             db.close()
         })()
@@ -56,7 +56,7 @@ function PostagemController(app) {
             db.close()
         })()
     }
-    
+
     app.put('/sobre/:id', Atualizar)
     function Atualizar(req, res) {
         (async () => {
@@ -66,13 +66,27 @@ function PostagemController(app) {
             })
             const result = await db.all('SELECT * FROM sobre where id like ?', req.params.id)
             if (result != '') {
-                res.send(`ok`)
-                await db.run('UPDATE sobre SET titulo=?, conteudo=?', req.body.titulo, req.body.conteudo)
+                if (req.body.titulo == '' && req.body.conteudo == '') {
+                    res.send({resp:`Sem dados para atualizar!`})
+                    return
+                } else if (req.body.titulo == '' && req.body.conteudo != '') {
+                    await db.run('UPDATE sobre SET conteudo=?', req.body.conteudo)
+                    res.send({resp:`Conteúdo atualizado com sucesso!`})
+                    return
+                } else if (req.body.titulo != '' && req.body.conteudo == '') {
+                    await db.run('UPDATE sobre SET titulo=?', req.body.titulo)
+                    res.send({resp:`Título atualizado com sucesso!`})
+                    return
+                } else {
+                    await db.run('UPDATE sobre SET titulo=?, conteudo=?', req.body.titulo, req.body.conteudo)
+                    res.send({resp:`Título e conteúdo atualizados com sucesso!`})
+                    return
+                }
             } else {
-                res.send(`erro`)
+                res.send({resp:`erro`})
             }
             db.close()
-        })() 
+        })()
     }
 
 
@@ -92,7 +106,7 @@ function PostagemController(app) {
     //         db.close()
     //     })()
     // }
-    
+
     // app.delete('/tecnologia/id/:id', deletarTitulo)
     // function deletarTitulo(req, res) {
     //     (async () => {
