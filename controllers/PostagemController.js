@@ -67,28 +67,53 @@ function PostagemController(app) {
             const result = await db.all('SELECT * FROM sobre where id like ?', req.params.id)
             if (result != '') {
                 if (req.body.titulo == '' && req.body.conteudo == '') {
-                    res.send({resp:`Sem dados para atualizar!`})
+                    res.send({ resp: `Sem dados para atualizar!` })
                     return
                 } else if (req.body.titulo == '' && req.body.conteudo != '') {
                     await db.run('UPDATE sobre SET conteudo=?', req.body.conteudo)
-                    res.send({resp:`Conteúdo atualizado com sucesso!`})
+                    res.send({ resp: `Conteúdo atualizado com sucesso!` })
                     return
                 } else if (req.body.titulo != '' && req.body.conteudo == '') {
                     await db.run('UPDATE sobre SET titulo=?', req.body.titulo)
-                    res.send({resp:`Título atualizado com sucesso!`})
+                    res.send({ resp: `Título atualizado com sucesso!` })
                     return
                 } else {
                     await db.run('UPDATE sobre SET titulo=?, conteudo=?', req.body.titulo, req.body.conteudo)
-                    res.send({resp:`Título e conteúdo atualizados com sucesso!`})
+                    res.send({ resp: `Título e conteúdo atualizados com sucesso!` })
                     return
                 }
             } else {
-                res.send({resp:`erro`})
+                res.send({ resp: `erro` })
             }
             db.close()
         })()
     }
 
+
+    
+    app.post('/usuario', checar)
+    function checar(req, res) {
+        (async () => {
+            const db = await open({
+                filename: './infra/dados.db',
+                driver: sqlite3.Database
+            })
+            
+            const select = await db.run('SELECT * FROM usuario where username like ? and password like ?', req.body.username, req.body.password)
+            if (select = !'') {
+                res.send({
+                    mensagem: `Usuário: ${req.body.username} encontrado.`,
+                    valid: true
+                })
+            }else{
+                res.send({
+                    mensagem: `Usuário: ${req.body.username} não encontrado.`,
+                    valid: false
+                })
+            }
+            db.close()
+        })()
+    }
 
     // app.get('/tecnologia/id/:id', buscarTitulo)
     // function buscarTitulo(req, res) {
